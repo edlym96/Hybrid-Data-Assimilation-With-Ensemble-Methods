@@ -2,3 +2,13 @@
 *.pdf
 /WindTunnel/
 /small3DLSBU/
+/.local
+/.ssh
+/.bash_history
+/.bash_logout
+/.bashrc
+/.cache
+/.gnupg
+/.viminfo
+/.python_history
+/.profile
