@@ -1,4 +1,4 @@
-./*.xlsx
+/*.xlsx
 *.pdf
-./WindTunnel
-./small3DLSBU
+/WindTunnel/
+/small3DLSBU/
