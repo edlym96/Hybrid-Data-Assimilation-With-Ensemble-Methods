@@ -20,5 +20,6 @@ for i in range(ntime):
 print ug.GetFieldNames()
 print uTot.shape
 
-np.savetxt('../data/txt_data/background_state.txt', uTot)
+np.savez_compressed('../data/converted_data/background_state.npz', uTot)
+#np.savetxt('../data/txt_data/background_state.txt', uTot)
 # df.to_csv('../data/csv_data/background_state.csv')
