@@ -35,11 +35,11 @@ dimuvwTot = len(uvwTot)
 """
 
 """ Load the background state data from npz file """
-
+print("Loading data...")
 #uTot = np.loadtxt("../data/txt_data/background_state.txt")
 npzfile = np.load("../data/converted_data/background_state.npz")
 uTot = npzfile['arr_0']
-print(uTot.shape)
+print("Shape of input data is ", uTot.shape)
 
 """Get the background errors using mean"""
 """
@@ -57,25 +57,32 @@ for j in range(n):
     for i in range(1,ntime+1):
         err[j+(i-1)*j] = abs(uvwTot[j+(i-1)*j]-m[j])
 """
-err = np.absolute(uTot-np.mean(uTot, axis = 0))
 
-print(err.shape)
 
 """BELOW IS FOR ENSEMBLE METHODS"""
 """get the background errors using ensemble"""
+print("Getting background error via ensemble...")
 ensemble_size = 20
 mean = np.mean(uTot, axis = 0)
 std = np.std(uTot, axis = 0)
 
 ensemble = np.array([])
 for i in range(mean.shape[0]):
-	print("Feature " + str(i))
+#	print("Feature " + str(i))
 	samples = np.random.normal(mean[i],std[i],ensemble_size)
 	ensemble = np.vstack([ensemble, samples]) if ensemble.size else samples # ensemble is of size n x Nens	
 
-print("Ensemble is ", ensemble.shape)
+ensemble_mean = np.expand_dims(np.mean(ensemble, axis = 1), axis = 1) # Get ensemble mean
+Xens = (1/math.sqrt(ensemble_size-1))*(ensemble-ensemble_mean) # Get ensemble errors given by formula
+print("Ensemble is ", Xens.shape)
+
 
 '''BELOW IS TSVD FORM OF SQUARE ROOT OF ERROR COVARIANCE'''
+print("Getting background error via TSVD")
+err = np.absolute(uTot-np.mean(uTot, axis = 0))
+
+print("err shape is ", err.shape)
+
 n = err.shape[1]
 
 #V =  np.transpose(np.reshape(err, (ntime,n)))
@@ -115,6 +122,7 @@ print("U dot s is ", X.shape)
 if not os.path.exists("../data/matrix_prec_"+str(ntime)):
 	os.mkdir("../data/matrix_prec_"+str(ntime))
 
+print("Saving preconditioned background error covariances...")
 np.savez_compressed("../data/matrix_prec_"+str(ntime)+"/matrixVprec"+str(trnc)+".npz", X)
 np.savez_compressed("../data/matrix_prec_"+str(ntime)+"/matrixVensemble.npz", Xens)
 
