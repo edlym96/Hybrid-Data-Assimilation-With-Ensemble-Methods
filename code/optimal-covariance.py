@@ -38,7 +38,7 @@ dimuvwTot = len(uvwTot)
 print("Loading data...")
 #uTot = np.loadtxt("../data/txt_data/background_state.txt")
 npzfile = np.load("../data/converted_data/background_state.npz")
-uTot = npzfile['arr_0']
+uTot = npzfile['u']
 print("Shape of input data is ", uTot.shape)
 
 """Get the background errors using mean"""
