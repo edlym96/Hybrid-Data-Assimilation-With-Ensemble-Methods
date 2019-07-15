@@ -63,7 +63,7 @@ for j in range(n):
 """BELOW IS FOR ENSEMBLE METHODS"""
 """get the background errors using ensemble"""
 print("Getting background error via ensemble...")
-ensemble_size = 50
+ensemble_size = 60
 mean = np.mean(uTot, axis = 0)
 std = np.std(uTot, axis = 0)
 
@@ -73,6 +73,7 @@ ensemble = np.array([])
 for i in range(mean.shape[0]):
 #	print("Feature " + str(i))
 	samples = np.random.normal(mean[i],std[i],ensemble_size)
+	#print(mean[i],std[i],samples)
 	ensemble = np.vstack([ensemble, samples]) if ensemble.size else samples # ensemble is of size n x Nens	
 
 ensemble_mean = np.expand_dims(np.mean(ensemble, axis = 1), axis = 1) # Get ensemble mean

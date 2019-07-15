@@ -26,8 +26,8 @@ m = trnc
 
 #  V is the truncated form of square root of the background error covariance, B
 #V = np.loadtxt('/.../matrixV'+str(m)+'-velocity.txt', usecols=range(m))
-V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVprec' + str(trnc) + '.npz')['arr_0']
-#V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVensemble50.npz')['arr_0']
+#V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVprec' + str(trnc) + '.npz')['arr_0']
+V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVensemble60.npz')['arr_0']
 
 print("V", V.shape)
 
