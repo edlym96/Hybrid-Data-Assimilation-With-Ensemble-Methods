@@ -18,14 +18,16 @@ sys.path.append('fluidity-master')
 #import vtktools
 
 
-ntime = 989 # Set the number of time steps
-trnc = 501 # Set the truncation parameter
+#ntime = 989 # Set the number of time steps
+ntime = 989//2 # Set the number of time steps
+trnc = 145 #501 # Set the truncation parameter
 
 m = trnc
 
 #  V is the truncated form of square root of the background error covariance, B
 #V = np.loadtxt('/.../matrixV'+str(m)+'-velocity.txt', usecols=range(m))
-V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVprec501.npz')['arr_0']
+V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVprec' + str(trnc) + '.npz')['arr_0']
+#V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVensemble50.npz')['arr_0']
 
 print("V", V.shape)
 
@@ -112,7 +114,7 @@ def J(v):
 	RJmis = JmisT.copy()
 	J1 = invR*np.dot(RJmis,Jmis)
 	Jv = (vTv + J1) / 2
-	return Jv.mean()
+	return LA.norm(Jv,2)
 
 
 # Gradient of J

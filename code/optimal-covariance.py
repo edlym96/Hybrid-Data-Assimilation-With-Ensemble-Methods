@@ -18,7 +18,8 @@ import sys
 #import vtktools
 
 # time steps
-ntime = 989
+#ntime = 989
+ntime = 989//2
 """Get the background state data"""
 """
 uvwTot = np.array([])
@@ -62,9 +63,11 @@ for j in range(n):
 """BELOW IS FOR ENSEMBLE METHODS"""
 """get the background errors using ensemble"""
 print("Getting background error via ensemble...")
-ensemble_size = 20
+ensemble_size = 50
 mean = np.mean(uTot, axis = 0)
 std = np.std(uTot, axis = 0)
+
+np.random.seed(7)
 
 ensemble = np.array([])
 for i in range(mean.shape[0]):
@@ -103,7 +106,7 @@ while st[trnc] >= ref and trnc < mid-1 :
         print "st[trnc]", st[trnc]
 '''
 
-trnc = 501
+trnc = 145
 
 
 print('value of trnc')
@@ -124,6 +127,6 @@ if not os.path.exists("../data/matrix_prec_"+str(ntime)):
 
 print("Saving preconditioned background error covariances...")
 np.savez_compressed("../data/matrix_prec_"+str(ntime)+"/matrixVprec"+str(trnc)+".npz", X)
-np.savez_compressed("../data/matrix_prec_"+str(ntime)+"/matrixVensemble.npz", Xens)
+np.savez_compressed("../data/matrix_prec_"+str(ntime)+"/matrixVensemble" + str(ensemble_size) + ".npz", Xens)
 
 
