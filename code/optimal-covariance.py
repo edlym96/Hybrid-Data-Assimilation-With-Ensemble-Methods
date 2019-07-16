@@ -156,9 +156,12 @@ def arg_parser():
 if __name__ == '__main__':
 	args = arg_parser()
 	filepath = args.filepath
-	trnc = args.trnc
-	ensemble_size = args.ens_size
+	trnc = int(args.trnc)
+	ensemble_size = int(args.ens_size)
+
 	uTot = load_data(filepath)
+	X = None
+	Xens = None
 
 	if args.tsvd and not args.ens:
 		X = tsvd_method(uTot, trnc)
