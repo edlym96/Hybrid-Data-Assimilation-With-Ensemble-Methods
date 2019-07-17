@@ -143,7 +143,7 @@ def arg_parser():
 						)
 	parser.add_argument('-Vp',
 						'--V_filepath',
-						default="../data/matrix_prec_494/matrixVprec145.npz",
+						default="../data/matrix_prec_494/matrixVensemble50.npz",
 						help='provide file path for observation data'
 						)
 	parser.add_argument('--ntime',
@@ -159,93 +159,6 @@ if __name__ == '__main__':
 
 	build_DA_solution(args.xB_filepath, args.y_filepath, args.V_filepath)
 
-# 	xB = np.transpose(
-# 		np.load(args.xB_filepath)['u'])[:,0]  # Transpose from 989x100040 to 100040x989
-# 	print("xB", xB.shape)
-#
-# 	n = xB.shape[0]
-# 	y = np.transpose(
-# 		np.load(args.y_filepath)['y'])[:,0]  # Transpose from 989x100040 to 100040x989
-# 	print("y", y.shape)
-#
-# 	# V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVprec' + str(trnc) + '.npz')['arr_0']
-# 	V = np.load(args.V_filepath)['arr_0']
-# 	lam = 0.1e-60
-# 	R = lam * 0.9
-# 	#x0 = np.ones(n)
-# 	x0 = np.ones(n)
-# 	Vin = np.linalg.pinv(V)
-# 	print("Vin", Vin.shape)
-#
-# 	v0 = np.dot(Vin,x0)  # Take x0 from physical to reduced space by dotting with inverse of reduced V (This works because of the way the cost function is defined dx = Vdu)
-# 	print("v0 ", v0.shape)
-# 	VT = np.transpose(V)
-#
-# 	# Background state in obervation space. H is taken as identity matrix so a direct copy can be used.
-# 	HxB = xB.copy()
-#
-# 	# Misfit calculated by subtracting
-# 	d = np.subtract(y, HxB)
-#
-# 	deltaxDA = np.array([])
-#
-# 	# for i in range(ntime):
-# 	di = d.copy()
-# 	# Need to structure the cost function to take in 1d input and reshape it back into matrix
-#
-# def J(v):
-# 	v = v.reshape((V.shape[1],1)) # need to reshape because optimize flattens input
-# 	#v = v.reshape((V.shape[1], 1))
-# 	vT = np.transpose(v)
-# 	vTv = np.dot(vT, v)
-# 	Vv = np.dot(V, v)
-# 	Jmis = np.subtract(Vv, di.reshape([n,1]))
-# 	invR = 1 / R
-# 	JmisT = np.transpose(Jmis)
-# 	J1 = invR * np.dot(JmisT, Jmis)
-# 	Jv = (vTv + J1) / 2
-# 	return LA.norm(Jv, 2)
-# 	#return Jv
-#
-# # Gradient of J
-# # In this case, the adjoint operator, g is taken as identity
-# def gradJ(v):
-# 	v = v.reshape((V.shape[1],1))
-# 	#v = v.reshape((V.shape[1], 1))
-# 	Vv = np.dot(V, v)
-# 	Jmis = np.subtract(Vv, di.reshape([n,1]))
-# 	invR = 1 / R
-# 	# g1 = Jmis.copy()
-# 	# g2 = np.dot(VT,g1)
-# 	# gg2 = np.multiply(invR , g2)
-# 	gg2 = np.multiply(invR, np.dot(VT, Jmis))  # VT[501x100040] Jmis[989x100040]
-# 	ggJ = v + gg2
-# 	return ggJ.flatten()
-# 	#return ggJ
-#
-# t = time.time()
-#
-# res = minimize(J, v0, method='L-BFGS-B', jac=gradJ, options={'disp': True})
-# vDA = np.reshape(res.x, (V.shape[1], 1))
-# deltaxDA = np.dot(V, vDA)  # take vDA from the reduced space back to x-space
-# #deltaxDA = np.hstack([deltaxDA, deltaxDAi]) if deltaxDA.shape else deltaxDAi
-#
-# elapsed = time.time() - t
-# print('elapsed', elapsed, '\n')
-#
-# xDA = xB.reshape([n,1]) + deltaxDA
-# print("xDA", xDA.shape)
-#
-# print("xB", xB.shape)
-# print("deltaxDA", deltaxDA.shape)
-#
-# errxB = y - xB
-# MSExb = LA.norm(errxB, 2) / LA.norm(y, 2)
-# print('L2 norm of the background error', MSExb, '\n')
-#
-# errxDA = y.reshape([n,1]) - xDA
-# MSExDA = LA.norm(errxDA, 2) / LA.norm(y, 2)
-# print('L2 norm of the error in DA solution', MSExDA, '\n')
 
 """
 ug.AddScalarField('uDA', xDA)
