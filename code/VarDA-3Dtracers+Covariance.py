@@ -74,11 +74,10 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 
 	t = time.time()
 	for i in range(ntime):
-		di = d[:,i].reshape([n,1])
-		# Need to structure the cost function to take in 1d input and reshape it back into matrix
+		print("Processing timestep no: ", i)
 
-		v0 = np.dot(Vin,x0)  # Take x0 from physical to reduced space by dotting with inverse of reduced V (This works because of the way the cost function is defined dx = Vdu)
-		print("v0", v0.shape)
+		di = d[:,i].reshape([n,1])
+
 		# Cost function J
 		def J(v):
 			# v = v.reshape((V.shape[1],ntime)) # need to reshape because optimize flattens input
@@ -94,6 +93,7 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 			Jv = (vTv + J1) / 2
 			# return LA.norm(Jv, 2)
 			return Jv
+
 		# Gradient of J
 		# In this case, the adjoint operator, g is taken as identity
 		def gradJ(v):
@@ -111,10 +111,10 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 			return ggJ
 
 
-		res = minimize(J, v0, method='L-BFGS-B', jac=gradJ, options={'disp': True})
+		res = minimize(J, v0, method='L-BFGS-B', jac=gradJ, options={'disp': False})
 		vDA = np.reshape(res.x, (V.shape[1], 1))
 		deltaxDAi = np.dot(V, vDA)  # take vDA from the reduced space back to x-space
-		deltaxDA = np.hstack([deltaxDA,deltaxDAi]) if deltaxDA.shape else deltaxDAi
+		deltaxDA = np.hstack([deltaxDA,deltaxDAi]) if deltaxDA.size else deltaxDAi
 
 	elapsed = time.time() - t
 	print('elapsed', elapsed, '\n')
