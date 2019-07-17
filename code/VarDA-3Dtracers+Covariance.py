@@ -16,7 +16,7 @@ from scipy.sparse.linalg import svds
 import sys
 #import vtktools
 import argparse
-sys.path.append('fluidity-master')
+#sys.path.append('fluidity-master')
 
 
 """
@@ -42,12 +42,12 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 
 
 	xB = np.transpose(
-		np.load(xB_filepath)['u'])  # Transpose from 989x100040 to 100040x989
+		np.load(xB_filepath)['u'][0])  # Transpose from 989x100040 to 100040x989
 	print("xB", xB.shape)
 
 	n = xB.shape[0]
 	y = np.transpose(
-		np.load(y_filepath)['y'])  # Transpose from 989x100040 to 100040x989
+		np.load(y_filepath)['y'][0])  # Transpose from 989x100040 to 100040x989
 	print("y", y.shape)
 
 	# V = np.load('../data/matrix_prec_' + str(ntime) + '/matrixVprec' + str(trnc) + '.npz')['arr_0']
@@ -59,8 +59,7 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 	Vin = np.linalg.pinv(V)
 	print("Vin", Vin.shape)
 
-	v0 = np.dot(Vin,
-				x0)  # Take x0 from physical to reduced space by dotting with inverse of reduced V (This works because of the way the cost function is defined dx = Vdu)
+	v0 = np.dot(Vin,x0)  # Take x0 from physical to reduced space by dotting with inverse of reduced V (This works because of the way the cost function is defined dx = Vdu)
 	print("v0 ", v0.shape)
 	VT = np.transpose(V)
 
@@ -69,56 +68,57 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 
 	# Misfit calculated by subtracting
 	d = np.subtract(y, HxB)
+
+
+	deltaxDA = np.array([])
+
 	t = time.time()
-	for i in range(ntime):
-		di = d[:, i]
-		# Need to structure the cost function to take in 1d input and reshape it back into matrix
-
-		deltaxDA = np.array([])
-
-		# Cost function J
-		def J(v):
-			# v = v.reshape((V.shape[1],ntime)) # need to reshape because optimize flattens input
-			v = v.reshape((V.shape[1], 1))
-			vT = np.transpose(v)
-			vTv = np.dot(vT, v)
-			Vv = np.dot(V, v)
-			Jmis = np.subtract(Vv, di)
-			invR = 1 / R
-			JmisT = np.transpose(Jmis)
-			RJmis = JmisT.copy()
-			J1 = invR * np.dot(RJmis, Jmis)
-			Jv = (vTv + J1) / 2
-			# return LA.norm(Jv, 2)
-			return Jv
-
-		# Gradient of J
-		# In this case, the adjoint operator, g is taken as identity
-		def gradJ(v):
-			# v = v.reshape((V.shape[1],ntime))
-			v = v.reshape((V.shape[1], 1))
-			Vv = np.dot(V, v)
-			Jmis = np.subtract(Vv, di)
-			invR = 1 / R
-			# g1 = Jmis.copy()
-			# g2 = np.dot(VT,g1)
-			# gg2 = np.multiply(invR , g2)
-			gg2 = np.multiply(invR, np.dot(VT, Jmis))  # VT[501x100040] Jmis[989x100040]
-			ggJ = v + gg2
-			# return ggJ.flatten()
-			return ggJ
-
-		res = minimize(J, v0, method='L-BFGS-B', jac=gradJ, options={'disp': True})
-
-		vDA = np.reshape(res.x, (V.shape[1], 1))
-
-		deltaxDAi = np.dot(V, vDA)  # take vDA from the reduced space back to x-space
-
-		deltaxDA = np.hstack([deltaxDA,deltaxDAi]) if deltaxDA.shape else deltaxDAi
+	#for i in range(ntime):
+	di = d.copy()
+	# Need to structure the cost function to take in 1d input and reshape it back into matrix
+		
+	v0 = np.dot(Vin,x0)  # Take x0 from physical to reduced space by dotting with inverse of reduced V (This works because of the way the cost function is defined dx = Vdu)
+	print("v0", v0.shape)
+	# Cost function J
+	def J(v):
+		# v = v.reshape((V.shape[1],ntime)) # need to reshape because optimize flattens input
+		v = v.reshape((V.shape[1], 1))
+		vT = np.transpose(v)
+		vTv = np.dot(vT, v)
+		Vv = np.dot(V, v)
+		Jmis = np.subtract(Vv, di)
+		invR = 1 / R
+		JmisT = np.transpose(Jmis)
+		RJmis = JmisT.copy()
+		J1 = invR * np.dot(RJmis, Jmis)
+		Jv = (vTv + J1) / 2
+		# return LA.norm(Jv, 2)
+		return Jv
+	# Gradient of J
+	# In this case, the adjoint operator, g is taken as identity
+	def gradJ(v):
+		# v = v.reshape((V.shape[1],ntime))
+		v = v.reshape((V.shape[1], 1))
+		Vv = np.dot(V, v)
+		Jmis = np.subtract(Vv, di)
+		invR = 1 / R
+		# g1 = Jmis.copy()
+		# g2 = np.dot(VT,g1)
+		# gg2 = np.multiply(invR , g2)
+		gg2 = np.multiply(invR, np.dot(VT, Jmis))  # VT[501x100040] Jmis[989x100040]
+		ggJ = v + gg2
+		# return ggJ.flatten()
+		return ggJ
+	
+	
+	res = minimize(J, v0, method='L-BFGS-B', jac=gradJ, options={'disp': True})
+	vDA = np.reshape(res.x, (V.shape[1], 1))
+	deltaxDAi = np.dot(V, vDA)  # take vDA from the reduced space back to x-space
+	deltaxDA = np.hstack([deltaxDA,deltaxDAi]) if deltaxDA.shape else deltaxDAi
 
 	elapsed = time.time() - t
 	print('elapsed', elapsed, '\n')
-
+	exit()
 	xDA = xB + deltaxDA
 
 	errxB = y - xB
@@ -144,7 +144,7 @@ def arg_parser():
 						)
 	parser.add_argument('-Vp',
 						'--V_filepath',
-						default=".../data/matrix_prec_494/matrixVprec145.npz",
+						default="../data/matrix_prec_494/matrixVprec145.npz",
 						help='provide file path for observation data'
 						)
 	parser.add_argument('--ntime',
