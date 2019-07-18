@@ -143,7 +143,7 @@ def arg_parser():
 						)
 	parser.add_argument('-Vp',
 						'--V_filepath',
-						default="../data/matrix_prec_494/matrixVensemble50.npz",
+						default="../data/matrix_prec_494/matrixVensemble200.npz",
 						help='provide file path for observation data'
 						)
 	parser.add_argument('--ntime',

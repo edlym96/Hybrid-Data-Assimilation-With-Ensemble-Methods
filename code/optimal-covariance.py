@@ -7,7 +7,7 @@ import time
 import argparse
 from numpy.linalg import inv
 from numpy import linalg as LA
-
+import time
 
 import math
 from scipy.sparse.linalg import svds
@@ -69,18 +69,23 @@ for j in range(n):
 """get the background errors using ensemble"""
 
 def ensemble_method(uTot, ensemble_size):
+	t = time.time()
 	print("Getting background error via ensemble...")
 	mean = np.mean(uTot, axis=0)
 	std = np.std(uTot, axis=0)
 	np.random.seed(7)
-	ensemble = np.array([])
+	#ensemble = np.array([])
+	ensemble = np.zeros([mean.shape[0], ensemble_size])
 	for i in range(mean.shape[0]):
-		#	print("Feature " + str(i))
+		print("Feature " + str(i))
 		samples = np.random.normal(mean[i], std[i], ensemble_size)
 		# print(mean[i],std[i],samples)
-		ensemble = np.vstack([ensemble, samples]) if ensemble.size else samples  # ensemble is of size n x Nens
+		#ensemble = np.vstack([ensemble, samples]) if ensemble.size else samples  # ensemble is of size n x Nens
+		ensemble[i] = samples
 	ensemble_mean = np.expand_dims(np.mean(ensemble, axis=1), axis=1)  # Get ensemble mean
 	Xens = (1 / math.sqrt(ensemble_size - 1)) * (ensemble - ensemble_mean)  # Get ensemble errors given by formula
+	elapsed = time.time() - t
+	print("Time taken for ensemble method " + str(elapsed))
 	print("Ensemble is ", Xens.shape)
 	return Xens
 
@@ -91,7 +96,7 @@ def ensemble_method(uTot, ensemble_size):
 
 
 def tsvd_method(uTot, trnc):
-	global V, Utrunc, strunc, Wtrunc, X
+	t = time.time()
 	print("Getting background error via TSVD")
 	err = np.absolute(uTot - np.mean(uTot, axis=0))
 	print("err shape is ", err.shape)
@@ -114,6 +119,8 @@ def tsvd_method(uTot, trnc):
     '''
 	Utrunc, strunc, Wtrunc = svds(V, k=trnc)
 	X = Utrunc.dot(np.diag(np.sqrt(strunc)))
+	elapsed = time.time() - t
+	print("Time taken for tsvd method is " + str(elapsed))
 	print("V is ", V.shape)
 	print("U is ", Utrunc.shape)
 	print("s is ", strunc.shape)

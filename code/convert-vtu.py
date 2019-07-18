@@ -8,8 +8,9 @@ import sys
 import vtktools
 
 ntime = 988 # timesteps (there are actually 989 but divide by 2 to split data evenly)
-uTot = np.array([])
-y = np.array([])
+features = 100040
+uTot = np.zeros([ntime, features])
+y = np.zeors([ntime, features])
 for i in range(ntime):
     filename = '../data/small3DLSBU/LSBU_' + str(i) + '.vtu'
     print "Processing file " + filename 
@@ -17,10 +18,12 @@ for i in range(ntime):
     if i < ntime/2:
     	ui = ug.GetScalarField('Tracer')
     	# Create the 2D u matrix, [ntime,n]
-    	uTot = np.vstack([uTot, ui]) if uTot.size else ui # model
+    	#uTot = np.vstack([uTot, ui]) if uTot.size else ui # model
+	uTot[i%(ntime//2)] = ui
     else:
     	yi = ug.GetScalarField('Tracer')
-    	y = np.vstack([y,yi]) if y.size else yi # observations
+    	#y = np.vstack([y,yi]) if y.size else yi # observations
+	y[i%(ntime//2)] = ui
 
 print ug.GetFieldNames()
 print uTot.shape
