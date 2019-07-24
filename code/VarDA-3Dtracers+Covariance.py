@@ -70,7 +70,7 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 	d = np.subtract(y, HxB)
 
 
-	deltaxDA = np.array([])
+	deltaxDA = np.zeros((n, ntime))
 
 	t = time.time()
 	for i in range(ntime):
@@ -113,8 +113,7 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 
 		res = minimize(J, v0, method='L-BFGS-B', jac=gradJ, options={'disp': False})
 		vDA = np.reshape(res.x, (V.shape[1], 1))
-		deltaxDAi = np.dot(V, vDA)  # take vDA from the reduced space back to x-space
-		deltaxDA = np.hstack([deltaxDA,deltaxDAi]) if deltaxDA.size else deltaxDAi
+		deltaxDA[:,i] = np.dot(V, vDA).flatten()  # take vDA from the reduced space back to x-space
 
 	elapsed = time.time() - t
 	print('elapsed', elapsed, '\n')
@@ -143,7 +142,7 @@ def arg_parser():
 						)
 	parser.add_argument('-Vp',
 						'--V_filepath',
-						default="../data/matrix_prec_494/matrixVensemble200.npz",
+						default="../data/matrix_prec_494/matrixVprec145.npz",
 						help='provide file path for observation data'
 						)
 	parser.add_argument('--ntime',
