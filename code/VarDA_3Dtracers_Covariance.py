@@ -9,7 +9,6 @@ import os
 from numpy.linalg import inv
 from numpy import linalg as LA
 
-
 import math
 from scipy.sparse.linalg import svds
 
@@ -19,6 +18,7 @@ import sys
 import argparse
 #sys.path.append('fluidity-master')
 
+from evaluate_DA_solution import evaluate_DA_solution
 
 """
 # Read .vtu file
@@ -122,13 +122,7 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 	print('elapsed', elapsed, 'seconds\n')
 	xDA = xB + deltaxDA
 
-	errxB = y - xB
-	MSExb = LA.norm(errxB, 2) / LA.norm(y, 2)
-	print('L2 norm of the background error', MSExb, '\n')
-
-	errxDA = y - xDA
-	MSExDA = LA.norm(errxDA, 2) / LA.norm(y, 2)
-	print('L2 norm of the error in DA solution', MSExDA, '\n')
+	MSExDA = evaluate_DA_solution(xDA, xB, y)
 
 	results_filename = os.path.basename(V_filepath)
 	save_DA_solution(xDA, MSExDA, results_filename)
