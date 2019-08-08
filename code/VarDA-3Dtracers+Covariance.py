@@ -4,6 +4,7 @@ from scipy.optimize import minimize
 import random
 import matplotlib.pyplot as plt
 import time
+import os
 
 from numpy.linalg import inv
 from numpy import linalg as LA
@@ -68,7 +69,9 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 
 	# Misfit calculated by subtracting
 	d = np.subtract(y, HxB)
-
+	#if localization:
+		#build_Ch()
+		#xB = np.multiply(Ch, xB)
 
 	deltaxDA = np.zeros((n, ntime))
 
@@ -116,7 +119,7 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 		deltaxDA[:,i] = np.dot(V, vDA).flatten()  # take vDA from the reduced space back to x-space
 
 	elapsed = time.time() - t
-	print('elapsed', elapsed, '\n')
+	print('elapsed', elapsed, 'seconds\n')
 	xDA = xB + deltaxDA
 
 	errxB = y - xB
@@ -127,6 +130,34 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime = 989//2):
 	MSExDA = LA.norm(errxDA, 2) / LA.norm(y, 2)
 	print('L2 norm of the error in DA solution', MSExDA, '\n')
 
+	results_filename = os.path.basename(V_filepath)
+	save_DA_solution(xDA, MSExDA, results_filename)
+
+def save_DA_solution(xDA, MSE, filename):
+	if not os.path.exists('../data/results'):
+		os.makedirs('../data/results')
+	print("Saving results to " + filename + "...")
+	np.savez_compressed("../data/results/Results" + filename, xDA, result=MSE)
+	
+
+def build_Ch(pos_file, cutoff, rh):
+	positions = pos_file.load(pos_file)['x']
+	#Lh = max(positions) - min(positions)
+	C = np.zeros([len(positions), len(positions)])
+	for i in range(C.shape[0]):
+		for j in range(i, C.shape[1]):
+			s = abs(positions[i]-positions[j])
+			if s <= cutoff/2:
+				C[i,j] = C[j,i]= 1
+			elif s >= cutoff:
+				C[i,j] = C[j,i] = 0
+			else:
+				C[i,j] = C[j,i] = 0.5*(1+math.cos((2*math.pi*(s-cutoff/2))/cutoff))
+	
+	W,V = LA.eig(C)
+	W = W[:,rh]
+	V = np.sqrt(V[:rh,:rh])
+	return np.matmul(W,V)
 
 def arg_parser():
 	parser = argparse.ArgumentParser(description='Calculate DA Solution')
@@ -143,7 +174,7 @@ def arg_parser():
 	parser.add_argument('-Vp',
 						'--V_filepath',
 						default="../data/matrix_prec_494/matrixVprec145.npz",
-						help='provide file path for observation data'
+						help='provide file path for reduced error covariance matrix'
 						)
 	parser.add_argument('--ntime',
 						default=494,

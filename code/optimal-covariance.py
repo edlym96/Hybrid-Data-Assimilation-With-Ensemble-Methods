@@ -71,17 +71,31 @@ for j in range(n):
 def ensemble_method(uTot, ensemble_size):
 	t = time.time()
 	print("Getting background error via ensemble...")
-	mean = np.mean(uTot, axis=0)
-	std = np.std(uTot, axis=0)
+	ensemble = np.zeros([uTot.shape[1],ensemble_size])
+	split_index = 0	
+	np.random.seed(7)
+	for split in np.array_split(uTot, ensemble_size, axis = 0):	
+		mean = np.mean(split, axis=0)
+		std = np.std(split, axis=0)
+		samples = np.zeros(mean.shape[0])
+		for i in range(mean.shape[0]):
+			samples[i] = np.random.normal(mean[i], std[i], 1)
+		ensemble[:, split_index] = samples
+		split_index += 1
+	"""
+	#mean = np.mean(uTot, axis=0)
+	#std = np.std(uTot, axis=0)
 	np.random.seed(7)
 	#ensemble = np.array([])
 	ensemble = np.zeros([mean.shape[0], ensemble_size])
+	
 	for i in range(mean.shape[0]):
 		print("Feature " + str(i))
 		samples = np.random.normal(mean[i], std[i], ensemble_size)
 		# print(mean[i],std[i],samples)
 		#ensemble = np.vstack([ensemble, samples]) if ensemble.size else samples  # ensemble is of size n x Nens
 		ensemble[i] = samples
+	"""
 	ensemble_mean = np.expand_dims(np.mean(ensemble, axis=1), axis=1)  # Get ensemble mean
 	Xens = (1 / math.sqrt(ensemble_size - 1)) * (ensemble - ensemble_mean)  # Get ensemble errors given by formula
 	elapsed = time.time() - t
@@ -136,7 +150,7 @@ def save_covariance_matrices(X = None, Xens = None, ntime = ntime, trnc = 145, e
 	if X is not None:
 		np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVprec" + str(trnc) + ".npz", X)
 	if Xens is not None:
-		np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVensemble" + str(ensemble_size) + ".npz", Xens)
+		np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVensembleSplit" + str(ensemble_size) + ".npz", Xens)
 
 
 def arg_parser():
