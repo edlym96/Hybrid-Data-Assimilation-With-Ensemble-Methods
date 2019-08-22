@@ -82,7 +82,7 @@ def arg_parser():
 if __name__ == '__main__':
     args = arg_parser()
 
-    # convert(args.filepath)
+    convert(args.filepath)
     convert(args.filepath, 'Velocity')
-    # convert(args.filepath, 'Pressure')
+    convert(args.filepath, 'Pressure')
     get_positions(args.filepath)

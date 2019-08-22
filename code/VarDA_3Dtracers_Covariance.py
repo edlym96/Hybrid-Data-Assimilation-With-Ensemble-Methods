@@ -3,7 +3,6 @@ import numpy as np
 from scipy.optimize import minimize
 import random
 import matplotlib.pyplot as plt
-import seaborn as sns
 import time
 import os
 
@@ -169,6 +168,7 @@ def localise_h(x_positions, y_positions, cutoff, rh=5):
 	for i in range(positions.shape[0]):
 		coord = positions[i]
 		for j in range(i,positions.shape[0]):
+			print(i,j)
 			s = LA.norm(positions[j]-coord, ord=2)
 			if s <= cutoff / 2:
 				C[i,j] = C[j,i]= 1
