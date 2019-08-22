@@ -4,18 +4,18 @@ steps=${1:-"10"}
 data_filepath=${2:-../data/small3DLSBU/}
 pos_filepath=${3:-../data/converted_data/positions.npz}
 
-./convert_vtu.py -fp $data_filepath
+#./convert_vtu.py -fp $data_filepath
 
-COUNTER=10
+#COUNTER=10
 
-while [	$COUNTER -le $(($steps * 10)) ];
-do
-	echo Calculating the ensemble for ens size of $COUNTER ...
-	./optimal_covariance.py -ens --ens_size $COUNTER -fp ../data/converted_data/background_state.npz
-	./optimal_covariance.py -ens --ens_size $COUNTER -fp ../data/converted_data/background_pressure.npz
-	./optimal_covariance.py -ens --ens_size $COUNTER -fp ../data/converted_data/background_velocity.npz
-	let COUNTER=COUNTER+10
-done
+#while [	$COUNTER -le $(($steps * 10)) ];
+#do
+#	echo Calculating the ensemble for ens size of $COUNTER ...
+#	./optimal_covariance.py -ens --ens_size $COUNTER -fp ../data/converted_data/background_state.npz
+#	./optimal_covariance.py -ens --ens_size $COUNTER -fp ../data/converted_data/background_pressure.npz
+#	./optimal_covariance.py -ens --ens_size $COUNTER -fp ../data/converted_data/background_velocity.npz
+#	let COUNTER=COUNTER+10
+#done
 
 COUNTER=10
 while [ $COUNTER  -le $(($steps * 10)) ];

@@ -68,7 +68,7 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime =
 		x_pos = np.load(pos_filepath)['pos'][:,0]
 		y_pos = np.load(pos_filepath)['pos'][:,1]
 		z_pos = np.load(pos_filepath)['pos'][:,2]
-		Ch = localise_h(x_pos, y_pos, 250) #Ch is (100000 , 50)
+		Ch = localise_h(x_pos, y_pos, 200) #Ch is (100000 , 50)
 		Cv = localise_v(z_pos, 10)
 		V_new = np.zeros([V.shape[0], V.shape[1]*Ch.shape[1]*Cv.shape[1]])
 		for i in range(V.shape[1]):
@@ -154,6 +154,7 @@ def save_DA_solution(xDA, MSE, filename, localisation, elapsed):
 	np.savez_compressed(path, xDA=xDA, result=MSE, time=elapsed)
 
 
+
 def localise_h(x_positions, y_positions, cutoff, rh=5):
 	#Lh = max(positions) - min(positions)
 	# C = np.zeros([len(positions), len(positions)])
@@ -163,11 +164,20 @@ def localise_h(x_positions, y_positions, cutoff, rh=5):
 
 	# positions = np.stack((downsampled_x,downsampled_y), axis=1)
 	positions = np.stack((x_positions, y_positions), axis=1)
+	print(positions.shape)
 	C = np.zeros((positions.shape[0],positions.shape[0]))
 	# t = time.time()
 	for i in range(positions.shape[0]):
-		coord = positions[i]
-		for j in range(i,positions.shape[0]):
+		print("calculating horizontal localisation for ", i)
+		#coord = positions[i]
+		tmp = np.tile(positions[i],(positions.shape[0]-i,1))
+		s = LA.norm(positions[i:]-tmp,ord=2,axis=1)
+		s[s<=cutoff/2] = 1
+		s[s>cutoff] = 0
+		s[(s>cutoff/2) & (s<=cutoff)] = 0.5*(1+np.cos((2*np.pi*(s[(s>cutoff/2) & (s<=cutoff)]-cutoff/2))/cutoff))
+ 		C[i,i:] = s
+		C[i:,i] = s
+		"""for j in range(i,positions.shape[0]):
 			print(i,j)
 			s = LA.norm(positions[j]-coord, ord=2)
 			if s <= cutoff / 2:
@@ -176,10 +186,9 @@ def localise_h(x_positions, y_positions, cutoff, rh=5):
 				C[i,j] = C[j,i] = 0
 			else:
 				C[i,j] = C[j,i] = 0.5*(1+math.cos((2*math.pi*(s-cutoff/2))/cutoff))
-
-
+		"""
 	W, V = LA.eigh(C, eigvals=(C.shape[0]-rh, C.shape[0]-1))
-	# print(C)
+	print(C)
 	# print(W)
 	# print(V)
 	# print(W.shape, V.shape)
@@ -197,10 +206,17 @@ def localise_h(x_positions, y_positions, cutoff, rh=5):
 def localise_v(z_positions, scale, rv=5):
 	C = np.zeros((z_positions.shape[0], z_positions.shape[0]))
 	for i in range(z_positions.shape[0]):
-		coord = z_positions[i]
-		for j in range(i,z_positions.shape[0]):
+		#coord = z_positions[i]
+		print("calculating vertical localisation for ", i)
+		tmp = np.tile(z_position[i],(z_positions.shape[0]-i,1))
+		s = np.abs(z_positions[i:]-tmp)
+		s=1/(1+(s/scale)**2)
+ 		C[i,i:] = s
+		C[i:,i] = s
+		"""for j in range(i,z_positions.shape[0]):
 			dz = abs(z_positions[j]-coord)
 			C[i, j] = C[j, i] = 1/(1+(dz/scale)**2)
+		"""
 	W, V = LA.eigh(C, eigvals=(C.shape[0] - rv, C.shape[0] - 1))
 	idx = W.argsort()[::-1]
 	# W = np.sqrt(W[idx])
