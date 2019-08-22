@@ -142,20 +142,20 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime =
 	MSExDA = evaluate_DA_solution(xDA, xB, y)
 
 	results_filename = os.path.basename(V_filepath)
-	save_DA_solution(xDA, MSExDA, results_filename, localisation)
+	save_DA_solution(xDA, MSExDA, results_filename, localisation, elapsed)
 
 
-def save_DA_solution(xDA, MSE, filename, localisation):
+def save_DA_solution(xDA, MSE, filename, localisation, elapsed):
 	if not os.path.exists('../data/results'):
 		os.makedirs('../data/results')
 	print("Saving results to " + filename + "...")
 	path = "../data/results/Results"
 	path += "Localisation" if localisation else ''
 	path += filename
-	np.savez_compressed(path, xDA=xDA, result=MSE)
+	np.savez_compressed(path, xDA=xDA, result=MSE, time=elapsed)
 
 
-def localise_h(x_positions, y_positions, cutoff, rh=10):
+def localise_h(x_positions, y_positions, cutoff, rh=5):
 	#Lh = max(positions) - min(positions)
 	# C = np.zeros([len(positions), len(positions)])
 	# TODO: MOVE CONSTRUCTION OF LOCALISATION MATRIX TO OPTIMAL COVARIANCE
@@ -194,7 +194,7 @@ def localise_h(x_positions, y_positions, cutoff, rh=10):
 	return np.matmul(V, np.diag(W))
 
 
-def localise_v(z_positions, scale, rv=10):
+def localise_v(z_positions, scale, rv=5):
 	C = np.zeros((z_positions.shape[0], z_positions.shape[0]))
 	for i in range(z_positions.shape[0]):
 		coord = z_positions[i]
@@ -207,6 +207,7 @@ def localise_v(z_positions, scale, rv=10):
 	W = W[idx]
 	V = V[:, idx]
 	return np.matmul(V,np.diag(W))
+
 
 def arg_parser():
 	parser = argparse.ArgumentParser(description='Calculate DA Solution')
@@ -236,7 +237,7 @@ def arg_parser():
 						)
 	parser.add_argument('--localisation',
 						'-local',
-						action='store_false',
+						action='store_true',
 						help='Turn on localisation'
 						)
 	args = parser.parse_args()

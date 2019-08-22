@@ -143,14 +143,14 @@ def tsvd_method(uTot, trnc):
 	return X
 
 
-def save_covariance_matrices(X = None, Xens = None, ntime = ntime, trnc = 145, ensemble_size = 50):
+def save_covariance_matrices(X = None, Xens = None, ntime = ntime, trnc = 145, ensemble_size = 50, name=''):
 	if not os.path.exists("../data/matrix_prec_" + str(ntime)):
 		os.mkdir("../data/matrix_prec_" + str(ntime))
 	print("Saving preconditioned background error covariances...")
 	if X is not None:
-		np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVprec" + str(trnc) + ".npz", X)
+		np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVprec" + str(trnc) +name+ ".npz", X)
 	if Xens is not None:
-		np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVensembleSplit" + str(ensemble_size) + ".npz", Xens)
+		np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVensembleSplit" + str(ensemble_size) + name+".npz", Xens)
 
 
 def arg_parser():
@@ -192,4 +192,6 @@ if __name__ == '__main__':
 		X = tsvd_method(uTot, trnc)
 		Xens = ensemble_method(uTot, ensemble_size)
 
-	save_covariance_matrices(X, Xens, ntime, trnc, ensemble_size)
+	name=os.path.basename(filepath).replace("background_", '').replace(".npz",'')
+
+	save_covariance_matrices(X, Xens, ntime, trnc, ensemble_size, name)
