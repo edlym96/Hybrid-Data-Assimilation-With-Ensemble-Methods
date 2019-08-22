@@ -65,11 +65,8 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime =
 	d = np.subtract(y, HxB)
 
 	if localisation:
-		x_pos = np.load(pos_filepath)['pos'][:,0]
-		y_pos = np.load(pos_filepath)['pos'][:,1]
-		z_pos = np.load(pos_filepath)['pos'][:,2]
-		Ch = localise_h(x_pos, y_pos, 200) #Ch is (100000 , 50)
-		Cv = localise_v(z_pos, 10)
+		Ch = np.load('../data/converted_data/localisation_h.npz')['C']
+		Cv = np.load('../data/converted_data/localisation_h.npz')['C']
 		V_new = np.zeros([V.shape[0], V.shape[1]*Ch.shape[1]*Cv.shape[1]])
 		for i in range(V.shape[1]):
 			tmp = np.tile(V[:,i],(Ch.shape[1],1)).transpose() #Shape (100000,50)
@@ -208,7 +205,7 @@ def localise_v(z_positions, scale, rv=5):
 	for i in range(z_positions.shape[0]):
 		#coord = z_positions[i]
 		print("calculating vertical localisation for ", i)
-		tmp = np.tile(z_position[i],(z_positions.shape[0]-i,1))
+		tmp = np.tile(z_positions[i],(z_positions.shape[0]-i,1))
 		s = np.abs(z_positions[i:]-tmp)
 		s=1/(1+(s/scale)**2)
  		C[i,i:] = s
