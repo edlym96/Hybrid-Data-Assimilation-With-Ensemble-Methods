@@ -60,9 +60,12 @@ def convert(filepath, field_name='Tracer'):
         obs_path = '../data/converted_data/obs_velocity.npz'
 
 
-    np.savez_compressed(back_path, u=uTot)
-    np.savez_compressed(obs_path, y=y)
-
+    #np.savez_compressed(back_path, u=uTot)
+    #np.savez_compressed(obs_path, y=y)
+    ug = vtktools.vtu(filepath+'LSBU_0.vtu')
+    ug.AddScalarField('x',np.mean(uTot,axis=0))
+    ug.AddScalarField('y',np.mean(y,axis=0))
+    ug.Write(filepath+'LSBU_0_results.vtu')
 
 def get_positions(filepath):
     ug = vtktools.vtu(filepath + 'LSBU_0.vtu')

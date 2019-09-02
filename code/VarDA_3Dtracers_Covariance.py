@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import numpy as np
 from scipy.optimize import minimize
 import random
@@ -14,7 +14,7 @@ from scipy.sparse.linalg import svds
 
 
 import sys
-#import vtktools
+import vtktools
 import argparse
 #sys.path.append('fluidity-master')
 
@@ -39,8 +39,8 @@ pos=ug.GetLocations()
 z=pos[:,2]
 """
 
-def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime = 989//2, localisation = True):
-
+def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime = 989//2, h_localisation = None,v_localisation=None):
+	
 
 	xB = np.transpose(
 		np.load(xB_filepath)['u'])  # Transpose from 989x100040 to 100040x989
@@ -64,9 +64,11 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime =
 	# Misfit calculated by subtracting
 	d = np.subtract(y, HxB)
 
-	if localisation:
-		Ch = np.load('../data/converted_data/localisation_h.npz')['C']
-		Cv = np.load('../data/converted_data/localisation_h.npz')['C']
+	if h_localisation and v_localisation:
+		#Ch = np.load('../data/converted_data/reduced_localisation_h'+str(rh)+'.npz')['C']
+		#Cv = np.load('../data/converted_data/reduced_localisation_v'+str(rv)+'.npz')['C']
+		Ch=np.load(h_localisation)['C']
+		Cv=np.load(v_localisation)['C']
 		V_new = np.zeros([V.shape[0], V.shape[1]*Ch.shape[1]*Cv.shape[1]])
 		for i in range(V.shape[1]):
 			tmp = np.tile(V[:,i],(Ch.shape[1],1)).transpose() #Shape (100000,50)
@@ -75,8 +77,25 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime =
 				tmp2 = np.tile(tmp[:,j],(Cv.shape[1],1)).transpose() #Shape (100000,40)
 				tmp2 = np.multiply(Cv,tmp2)
 				V_new[:,(i*Ch.shape[1]+j)*Cv.shape[1]:(i*Ch.shape[1]+j+1)*Cv.shape[1]] = tmp2
-
 		V = V_new
+	elif h_localisation and not v_localisation:
+		#Ch = np.load('../data/converted_data/reduced_localisation_h'+str(rh)+'.npz')['C']
+		Ch=np.load(h_localisation)['C']
+		V_new = np.zeros([V.shape[0], V.shape[1]*Ch.shape[1]])
+		for i in range(V.shape[1]):
+			tmp = np.tile(V[:,i],(Ch.shape[1],1)).transpose() #Shape (100000,50)
+			tmp = np.multiply(Ch, tmp)
+			V_new[:,i*Ch.shape[1]:(i+1)*Ch.shape[1]] = tmp
+		V=V_new
+	elif v_localisation and not h_localisation:
+		#Cv = np.load('../data/converted_data/reduced_localisation_v'+str(rv)+'.npz')['C']
+		Cv=np.load(v_localisation)['C']
+		V_new = np.zeros([V.shape[0], V.shape[1]*Cv.shape[1]])
+		for i in range(V.shape[1]):
+			tmp = np.tile(V[:,i],(Cv.shape[1],1)).transpose() #Shape (100000,50)
+			tmp = np.multiply(Cv, tmp)
+			V_new[:,i*Cv.shape[1]:(i+1)*Cv.shape[1]] = tmp
+		V=V_new
 
 	Vin = np.linalg.pinv(V)
 
@@ -129,29 +148,52 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime =
 
 		res = minimize(J, v0, method='L-BFGS-B', jac=gradJ, options={'disp': False})
 		vDA = np.reshape(res.x, (V.shape[1], 1))
-		deltaxDA[:,i] = np.dot(V, vDA).flatten()  # take vDA from the reduced space back to x-space
+		deltaxDA[:,i] = np.dot(V,vDA).flatten() # take vDA from the reduced space back to x-space
+		v0 = vDA #FGAT step
+
 
 	elapsed = time.time() - t
 	print('elapsed', elapsed, 'seconds\n')
 	xDA = xB + deltaxDA
-
+	
 	MSExDA = evaluate_DA_solution(xDA, xB, y)
 
 	results_filename = os.path.basename(V_filepath)
-	save_DA_solution(xDA, MSExDA, results_filename, localisation, elapsed)
+	save_DA_solution(xDA,deltaxDA,y, MSExDA, results_filename, h_localisation,v_localisation, elapsed)
 
 
-def save_DA_solution(xDA, MSE, filename, localisation, elapsed):
+def save_DA_solution(xDA,deltaxDA,y,MSE, filename, h_localisation,v_localisation, elapsed):
 	if not os.path.exists('../data/results'):
 		os.makedirs('../data/results')
 	print("Saving results to " + filename + "...")
+	ug = vtktools.vtu('../data/small3DLSBU/LSBU_0_results.vtu')
+	ug.AddScalarField('y-xDA',np.mean(np.abs(y-xDA),axis=1))
+	ug.AddScalarField('y-xB',np.mean(np.abs(y-xDA+deltaxDA),axis=1))
+	ug.AddScalarField('deltaxDA',np.mean(deltaxDA,axis=1))
+	ug.AddScalarField('xDA', np.mean(xDA,axis=1))
+	ug.AddScalarField('y', np.mean(y,axis=1))
+	ug.AddScalarField('xB', np.mean(xDA-deltaxDA,axis=1))
 	path = "../data/results/Results"
-	path += "Localisation" if localisation else ''
+	if h_localisation or v_localisation:
+		#path += "Localisation"
+		path += "LocalisationFGAT"
+		if h_localisation:
+			path += h_localisation.replace("../data/converted_data/reduced_localisation_h",'rh')
+		else:
+			path += 'rh0'
+		if v_localisation:
+			#path += 'rv'+str(rv)
+			path += v_lovalisation.replace("../data/converted_data/reduced_localisation_v",'rv')
+
+		else:
+			path += 'rv0'
 	path += filename
-	np.savez_compressed(path, xDA=xDA, result=MSE, time=elapsed)
+	print("Saving results to " + path + "...")
+	np.savez_compressed(path, result=MSE, time=elapsed)
+	ug.Write(path.replace('.npz','.vtu'))
 
 
-
+"""
 def localise_h(x_positions, y_positions, cutoff, rh=5):
 	#Lh = max(positions) - min(positions)
 	# C = np.zeros([len(positions), len(positions)])
@@ -174,16 +216,6 @@ def localise_h(x_positions, y_positions, cutoff, rh=5):
 		s[(s>cutoff/2) & (s<=cutoff)] = 0.5*(1+np.cos((2*np.pi*(s[(s>cutoff/2) & (s<=cutoff)]-cutoff/2))/cutoff))
  		C[i,i:] = s
 		C[i:,i] = s
-		"""for j in range(i,positions.shape[0]):
-			print(i,j)
-			s = LA.norm(positions[j]-coord, ord=2)
-			if s <= cutoff / 2:
-				C[i,j] = C[j,i]= 1
-			elif s > cutoff:
-				C[i,j] = C[j,i] = 0
-			else:
-				C[i,j] = C[j,i] = 0.5*(1+math.cos((2*math.pi*(s-cutoff/2))/cutoff))
-		"""
 	W, V = LA.eigh(C, eigvals=(C.shape[0]-rh, C.shape[0]-1))
 	print(C)
 	# print(W)
@@ -210,17 +242,13 @@ def localise_v(z_positions, scale, rv=5):
 		s=1/(1+(s/scale)**2)
  		C[i,i:] = s
 		C[i:,i] = s
-		"""for j in range(i,z_positions.shape[0]):
-			dz = abs(z_positions[j]-coord)
-			C[i, j] = C[j, i] = 1/(1+(dz/scale)**2)
-		"""
 	W, V = LA.eigh(C, eigvals=(C.shape[0] - rv, C.shape[0] - 1))
 	idx = W.argsort()[::-1]
 	# W = np.sqrt(W[idx])
 	W = W[idx]
 	V = V[:, idx]
 	return np.matmul(V,np.diag(W))
-
+"""
 
 def arg_parser():
 	parser = argparse.ArgumentParser(description='Calculate DA Solution')
@@ -248,11 +276,25 @@ def arg_parser():
 						default=494,
 						help='number of timesteps'
 						)
-	parser.add_argument('--localisation',
-						'-local',
-						action='store_true',
+	parser.add_argument('--h_localisation',
+						'-hlocal',
 						help='Turn on localisation'
 						)
+	parser.add_argument('--v_localisation',
+						'-vlocal',
+						help='Turn on vertical localisation'
+						)
+	
+	#parser.add_argument('-rh',
+						#default=5,
+						#help='horizontal eof'
+						#)
+	
+	#parser.add_argument('-rv',
+						#default=5,
+						#help='vertical eof'
+						#)
+
 	args = parser.parse_args()
 	return args
 
@@ -260,7 +302,7 @@ def arg_parser():
 if __name__ == '__main__':
 	args = arg_parser()
 
-	build_DA_solution(args.xB_filepath, args.y_filepath, args.V_filepath, args.pos_filepath, args.ntime, args.localisation)
+	build_DA_solution(args.xB_filepath, args.y_filepath, args.V_filepath, args.pos_filepath, args.ntime, args.h_localisation,args.v_localisation)
 
 
 """

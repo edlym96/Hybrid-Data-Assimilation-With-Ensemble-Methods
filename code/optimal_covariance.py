@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import numpy as np
 from scipy.optimize import minimize
 import random
 import matplotlib.pyplot as plt
 import time
 import argparse
-from numpy.linalg import inv
+from scipy.linalg import inv
 from numpy import linalg as LA
 import time
 
@@ -101,6 +101,7 @@ def ensemble_method(uTot, ensemble_size):
 	elapsed = time.time() - t
 	print("Time taken for ensemble method " + str(elapsed))
 	print("Ensemble is ", Xens.shape)
+	np.save("../data/matrix_prec_" + str(ntime) + "/matrixVensembleSplit" + str(ensemble_size) +"elapsed"+ ".npy", elapsed)
 	return Xens
 
 
@@ -140,6 +141,7 @@ def tsvd_method(uTot, trnc):
 	print("s is ", strunc.shape)
 	print("WT is ", Wtrunc.shape)
 	print("U dot s is ", X.shape)
+	np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVprec" + str(trnc) +'elapsed'+ ".npy", elapsed)
 	return X
 
 
@@ -194,4 +196,4 @@ if __name__ == '__main__':
 
 	name=os.path.basename(filepath).replace("background_", '').replace(".npz",'')
 
-	save_covariance_matrices(X, Xens, ntime, trnc, ensemble_size, name)
+	#save_covariance_matrices(X, Xens, ntime, trnc, ensemble_size, name)
