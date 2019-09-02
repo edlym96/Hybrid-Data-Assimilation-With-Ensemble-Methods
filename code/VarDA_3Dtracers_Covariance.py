@@ -184,12 +184,12 @@ def save_DA_solution(xDA,deltaxDA,y,MSE, filename, h_localisation,v_localisation
 		#path += "Localisation"
 		path += "LocalisationFGAT"
 		if h_localisation:
-			path += h_localisation.replace("../data/converted_data/reduced_localisation_h",'rh')
+			path += h_localisation.replace("../data/converted_data/reduced_localisation_h",'rh').replace('.npz','')
 		else:
 			path += 'rh0'
 		if v_localisation:
 			#path += 'rv'+str(rv)
-			path += v_localisation.replace("../data/converted_data/reduced_localisation_v",'rv')
+			path += v_localisation.replace("../data/converted_data/reduced_localisation_v",'rv').replace('.npz','')
 
 		else:
 			path += 'rv0'
