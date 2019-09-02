@@ -141,7 +141,7 @@ def tsvd_method(uTot, trnc):
 	print("s is ", strunc.shape)
 	print("WT is ", Wtrunc.shape)
 	print("U dot s is ", X.shape)
-	np.savez_compressed("../data/matrix_prec_" + str(ntime) + "/matrixVprec" + str(trnc) +'elapsed'+ ".npy", elapsed)
+	np.save("../data/matrix_prec_" + str(ntime) + "/matrixVprec" + str(trnc) +'elapsed'+ ".npy", elapsed)
 	return X
 
 
