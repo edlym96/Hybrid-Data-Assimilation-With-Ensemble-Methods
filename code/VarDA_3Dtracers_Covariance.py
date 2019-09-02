@@ -164,7 +164,7 @@ def build_DA_solution(xB_filepath, y_filepath, V_filepath, pos_filepath, ntime =
 	errxDA = y - xDA
 	msexDA = LA.norm(errxDA, 2,axis=0) / LA.norm(y, 2,axis=0)
 	results_filename = os.path.basename(V_filepath)
-	np.savez_compressed('../data/results/'+'dstributed_in_time'+h_localisation.replace("../data/converted_data/reduced_localisation_h",'rh')+v_localisation.replace("../data/converted_data/reduced_localisation_v",'rv')+results_filename, msexB=msexb, msexDA=msexDA)
+	np.savez_compressed('../data/results/'+'distributed_in_time'+h_localisation.replace("../data/converted_data/reduced_localisation_h",'rh')+v_localisation.replace("../data/converted_data/reduced_localisation_v",'rv')+results_filename, msexB=msexb, msexDA=msexDA)
 	save_DA_solution(xDA,deltaxDA,y, MSExDA, results_filename, h_localisation,v_localisation, elapsed)
 
 

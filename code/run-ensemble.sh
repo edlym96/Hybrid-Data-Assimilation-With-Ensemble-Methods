@@ -17,9 +17,9 @@ pos_filepath=${3:-../data/converted_data/positions.npz}
 #	let COUNTER=COUNTER+10
 #done
 
-#COUNTER=150
-#while [ $COUNTER  -le 350 ];
-#do
+COUNTER=250
+while [ $COUNTER  -le 350 ];
+do
 	#filepath=../data/matrix_prec_494/matrixVensembleSplit"$COUNTER"state.npz
 	#pressure_filepath=../data/matrix_prec_494/matrixVensembleSplit"$COUNTER"pressure.npz
 	#velocity_filepath=../data/matrix_prec_494/matrixVensembleSplit"$COUNTER"velocity.npz
@@ -35,8 +35,8 @@ pos_filepath=${3:-../data/converted_data/positions.npz}
 	obs_pressure_fp=../data/converted_data/obs_pressure.npz
 	obs_velocity_fp=../data/converted_data/obs_velocity.npz
 	
-	#hlocal_fp=../data/converted_data/reduced_localisation_h3_"$COUNTER".npz
-	hlocal_fp=../data/converted_data/reduced_localisation_h3_150.npz
+	hlocal_fp=../data/converted_data/reduced_localisation_h3_"$COUNTER".npz
+	#hlocal_fp=../data/converted_data/reduced_localisation_h3_150.npz
 	vlocal_fp=../data/converted_data/reduced_localisation_v3.npz
 
 	#echo Building solution for ensemble size of $COUNTER
@@ -44,12 +44,12 @@ pos_filepath=${3:-../data/converted_data/positions.npz}
 	./VarDA_3Dtracers_Covariance.py -Vp $filepath -posp $pos_filepath -xBp $background_fp -yp $obs_fp -hlocal $hlocal_fp
 	#./VarDA_3Dtracers_Covariance.py -Vp $filepath -posp $pos_filepath -xBp $background_fp -yp $obs_fp -hlocal $hlocal_fp -vlocal $vlocal_fp
 	#./VarDA_3Dtracers_Covariance.py -Vp $pressure_filepath -posp $pos_filepath -xBp $background_pressure_fp -yp $obs_pressure_fp
-	./VarDA_3Dtracers_Covariance.py -Vp $pressure_filepath -posp $pos_filepath -xBp $background_pressure_fp -yp $obs_pressure_fp -hlocal $hlocal_fp
+	#./VarDA_3Dtracers_Covariance.py -Vp $pressure_filepath -posp $pos_filepath -xBp $background_pressure_fp -yp $obs_pressure_fp -hlocal $hlocal_fp
 	#./VarDA_3Dtracers_Covariance.py -Vp $pressure_filepath -posp $pos_filepath -xBp $background_pressure_fp -yp $obs_pressure_fp -hlocal -rh 3 -vlocal -rv 3
 	#./VarDA_3Dtracers_Covariance.py -Vp $velocity_filepath -posp $pos_filepath -xBp $background_velocity_fp -yp $obs_velocity_fp
-	./VarDA_3Dtracers_Covariance.py -Vp $velocity_filepath -posp $pos_filepath -xBp $background_velocity_fp -yp $obs_velocity_fp -hlocal $hlocal_fp
+	#./VarDA_3Dtracers_Covariance.py -Vp $velocity_filepath -posp $pos_filepath -xBp $background_velocity_fp -yp $obs_velocity_fp -hlocal $hlocal_fp
 	#./VarDA_3Dtracers_Covariance.py -Vp $velocity_filepath -posp $pos_filepath -xBp $background_velocity_fp -yp $obs_velocity_fp -hlocal -rh 3 -vlocal -rv 3
 	#let COUNTER=COUNTER+50
-#done
+done
 
 echo All done
