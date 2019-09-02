@@ -101,7 +101,7 @@ def ensemble_method(uTot, ensemble_size):
 	elapsed = time.time() - t
 	print("Time taken for ensemble method " + str(elapsed))
 	print("Ensemble is ", Xens.shape)
-	np.save("../data/matrix_prec_" + str(ntime) + "/matrixVensembleSplit" + str(ensemble_size) +"elapsed"+ ".npy", elapsed)
+	np.save("../data/results" + str(ntime) + "/matrixVensembleSplit" + str(ensemble_size) +"elapsed"+ ".npy", elapsed)
 	return Xens
 
 
@@ -141,7 +141,7 @@ def tsvd_method(uTot, trnc):
 	print("s is ", strunc.shape)
 	print("WT is ", Wtrunc.shape)
 	print("U dot s is ", X.shape)
-	np.save("../data/matrix_prec_" + str(ntime) + "/matrixVprec" + str(trnc) +'elapsed'+ ".npy", elapsed)
+	np.save("../data/results" + str(ntime) + "/matrixVprec" + str(trnc) +'elapsed'+ ".npy", elapsed)
 	return X
 
 
