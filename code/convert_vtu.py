@@ -42,8 +42,8 @@ def convert(filepath, field_name='Tracer'):
 
 
     print(ug.GetFieldNames())
-    print(uTot.shape)
-    print(y.shape)
+    print(uTot)
+    print(y)
 
     if not os.path.exists("../data"):
         os.mkdir("../data")
