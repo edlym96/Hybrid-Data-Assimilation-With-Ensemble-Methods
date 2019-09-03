@@ -69,3 +69,11 @@ sns.set()
 # print(msexB)
 # msexDA = np.load('../data/results/results/distributed_in_time_rh3_200matrixVensembleSplit40state.npz')['msexDA']
 # print(msexDA)
+
+# time_arr=[]
+# for i in range(10,101,10):
+#     time = int(np.load('../data/results/results/matrixVensembleSplit'+str(i)+'elapsed.npy'))
+#     time_arr.append(time)
+# time_arr.append(int(np.load('../data/results/results/matrixVprec145elapsed.npz')['arr_0']))
+#
+# print(time_arr)
