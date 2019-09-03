@@ -77,3 +77,10 @@ sns.set()
 # time_arr.append(int(np.load('../data/results/results/matrixVprec145elapsed.npz')['arr_0']))
 #
 # print(time_arr)
+
+print(np.load('../data/results/results/ResultsLocalisationFGATrh3rv3matrixVensembleSplit40state.npz')['result'])
+print(np.load('../data/results/results/ResultsLocalisationFGATrh3rv3matrixVensembleSplit40state.npz')['time'])
+print(np.load('../data/results/results/ResultsmatrixVensembleSplit40state.npz')['result'])
+print(np.load('../data/results/results/ResultsmatrixVensembleSplit40state.npz')['time'])
+print(np.load('../data/results/results/ResultsmatrixVprec145.npz')['result'])
+print(np.load('../data/results/results/ResultsmatrixVprec145.npz')['time'])
