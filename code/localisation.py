@@ -8,13 +8,7 @@ import os
 
 
 def localise_h(x_positions, y_positions, cutoff, rh=5):
-    # Lh = max(positions) - min(positions)
-    # C = np.zeros([len(positions), len(positions)])
-    # TODO: MOVE CONSTRUCTION OF LOCALISATION MATRIX TO OPTIMAL COVARIANCE
-    # downsampled_x = x_positions[::scale]
-    # downsampled_y = y_positions[::scale]
-
-    # positions = np.stack((downsampled_x,downsampled_y), axis=1)
+    # Checks if the full-rank localisation matrix already exists. If not, build it
     if os.path.exists('../data/converted_data/Ch.npy'):
         C = np.load('../data/converted_data/Ch.npy')
     else:
@@ -35,19 +29,8 @@ def localise_h(x_positions, y_positions, cutoff, rh=5):
             C[i:, i] = s
         print("saving matrix Ch...")
         np.save('../data/converted_data/Ch.npy', C)
-    # W, V = LA.eigh(C, eigvals=(C.shape[0] - rh, C.shape[0] - 1),overwrite_a=True)
-    # print(C)
-    # print(W)
-    # print(V)
-    # print(W.shape, V.shape)
-    # print(np.matmul(V, np.diag(W)).shape)
-    # idx = W.argsort()[::-1]
-    # W = np.sqrt(W[idx])
-    # W = W[idx]
-    # V = V[:, idx]
-    # W = np.sqrt(W)
-    # print(time.time()-t)
-    # # print(np.matmul(W, V).shape)
+
+    # Perform the decomposition on the localisation matrix and take the first rh EOFs
     V, W, _ = svds(C, k=rh)
     ans = np.matmul(V, np.diag(W))
     explained_variance = np.var(ans, axis=0) / np.var(C, axis=0).sum()
@@ -58,6 +41,7 @@ def localise_h(x_positions, y_positions, cutoff, rh=5):
 
 
 def localise_v(z_positions, scale, rv=5):
+    # Checks if the full-rank localisation matrix already exists. If not, build it
     if os.path.exists('../data/converted_data/Cv.npy'):
         C = np.load('../data/converted_data/Cv.npy')
     else:
@@ -72,11 +56,8 @@ def localise_v(z_positions, scale, rv=5):
             C[i:, i] = s
         print("saving matrix Cv...")
         C = np.save('../data/converted_data/Cv.npy', C)
-    # W, V = LA.eigh(C, eigvals=(C.shape[0] - rv, C.shape[0] - 1), overwrite_a=True)
-    # idx = W.argsort()[::-1]
-    # W = np.sqrt(W[idx])
-    # W = W[idx]
-    # V = V[:, idx]
+
+        # Perform the decomposition on the localisation matrix and take the first rv EOFs
     V, W, _ = svds(C, k=rv)
     ans = np.matmul(V, np.diag(W))
     explained_variance = np.var(ans, axis=0) / np.var(C, axis=0).sum()
@@ -93,11 +74,11 @@ def arg_parser():
                         help='provide file path for position matrix'
                         )
     parser.add_argument('-rh',
-                        default=5,
+                        default=3,
                         help="Horizontal EOF modes"
                         )
     parser.add_argument('-rv',
-                        default=5,
+                        default=3,
                         help='Vertical EOF modes'
                         )
     parser.add_argument('-h_cutoff',
@@ -111,11 +92,15 @@ def arg_parser():
 
 if __name__ == '__main__':
     args = arg_parser()
-    x_pos = np.load(args.pos_filepath)['pos'][:, 0]
-    y_pos = np.load(args.pos_filepath)['pos'][:, 1]
-    z_pos = np.load(args.pos_filepath)['pos'][:, 2]
+    try:
+        x_pos = np.load(args.pos_filepath)['pos'][:, 0]
+        y_pos = np.load(args.pos_filepath)['pos'][:, 1]
+        z_pos = np.load(args.pos_filepath)['pos'][:, 2]
+    except:
+        print("Position filepath not found. Please run convert_vtu.py with pos flag on")
+
     C = localise_h(x_pos, y_pos, int(args.h_cutoff), int(args.rh))  # Ch is (100000 , 50)
-    # np.savez_compressed('../data/converted_data/reduced_localisation_h'+str(args.rh)+'_'+str(args.h_cutoff)+'.npz',C=C)
+    np.savez_compressed('../data/converted_data/reduced_localisation_h'+str(args.rh)+'_'+str(args.h_cutoff)+'.npz',C=C)
     C = None
     C = localise_v(z_pos, 10, int(args.rv))
-    # np.savez_compressed('../data/converted_data/reduced_localisation_v'+str(args.rv)+'.npz', C=C)
+    np.savez_compressed('../data/converted_data/reduced_localisation_v'+str(args.rv)+'.npz', C=C)

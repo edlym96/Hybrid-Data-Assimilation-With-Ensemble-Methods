@@ -1,17 +1,10 @@
 import numpy as np
-from scipy.optimize import minimize
-
-import matplotlib.pyplot as plt
+import vtktools
 import os
-
 from numpy import linalg as LA
 
-import math
-
-import sys
-#import vtktools
+# import vtktools
 import argparse
-#sys.path.append('fluidity-master')
 
 
 def evaluate_DA_solution(xDA, xB, y):
@@ -25,24 +18,31 @@ def evaluate_DA_solution(xDA, xB, y):
 
     return MSExDA
 
+
 def arg_parser():
     parser = argparse.ArgumentParser(description='Evaluate DA solution')
-    parser.add_argument('-xDA',
-                        '--xDA_filepath',
+    parser.add_argument('-results',
+                        '--results_filepath',
                         help='provide xDA solution filepath')
-    parser.add_argument('-xB',
-                        '--xB_filepath',
-                        default="../data/converted_data/background_state.npz",
-                        help='provide file path for background data')
-    parser.add_argument('-y',
-                        '--y_filepath',
-                        default="../data/converted_data/observations.npz",
-                        help='provide file path for observation data')
     args = parser.parse_args()
     return args
 
 
 if __name__ == '__main__':
     args = arg_parser()
-
-    evaluate_DA_solution(args.xDa, args.xB, args.y)
+    if os.path.basename(args.results)[-3:] == "vtu":
+        try:
+            ug = vtktools.vtu(args.results)
+        except:
+            print("invalid vtu file")
+        xDA = ug.GetScalarField('xDA')
+        xB = ug.GetScalarField('xB')
+        y = ug.GetScalarField('y')
+        evaluate_DA_solution(xDA, xB, y)
+    elif os.path.basename(args.results)[-3:] == "npz":
+        result = np.load(args.results)
+        print('L2 norm of the error in DA solution', result['control'])
+        print('L2 norm of the error in DA solution', result['result'])
+        print('Time taken to run DA', result['time'])
+    else:
+        print("Invalid File")
