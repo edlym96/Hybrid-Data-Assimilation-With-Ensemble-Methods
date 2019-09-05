@@ -24,6 +24,16 @@ def arg_parser():
     parser.add_argument('-results',
                         '--results_filepath',
                         help='provide xDA solution filepath')
+    parser.add_argument('-xBp',
+                        '--xB_filepath',
+                        default="../data/converted_data/background_state.npz",
+                        help='provide file path for background state data'
+                        )
+    parser.add_argument('-yp',
+                        '--y_filepath',
+                        default="../data/converted_data/observations.npz",
+                        help='provide file path for observation data'
+                        )
     args = parser.parse_args()
     return args
 
@@ -44,5 +54,9 @@ if __name__ == '__main__':
         print('L2 norm of the error in DA solution', result['control'])
         print('L2 norm of the error in DA solution', result['result'])
         print('Time taken to run DA', result['time'])
+        xDA = result['xDA']
+        y = np.load(args.y_filepath)['y']
+        xB = np.load(args.xB_filepath)['x']
+        evaluate_DA_solution(xDA, xB, y)
     else:
         print("Invalid File")

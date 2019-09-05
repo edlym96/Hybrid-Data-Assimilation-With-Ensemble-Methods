@@ -9,6 +9,7 @@ from scipy import linalg as LA
 import vtktools
 import argparse
 
+
 # sys.path.append('fluidity-master')
 
 
@@ -182,8 +183,8 @@ def save_DA_solution(xDA, deltaxDA, y, MSE, MSExb, filename, h_localisation, v_l
             path += 'rv0'
     path += filename
     print("Saving results to " + path + "...")
-    np.savez_compressed(path, result=MSE, time=elapsed, control=MSExb) # SAve MSE, control and time taken
-    ug.Write(path.replace('.npz', '.vtu')) # Save the results of DA to vtu
+    np.savez_compressed(path, result=MSE, time=elapsed, control=MSExb, xDA=xDA)  # SAve MSE, control and time taken
+    ug.Write(path.replace('.npz', '.vtu'))  # Save the results of DA to vtu
 
 
 def evaluate_DA_solution(xDA, xB, y):
