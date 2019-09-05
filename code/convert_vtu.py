@@ -10,28 +10,28 @@ from scipy import linalg as LA
 def convert(filepath, field_name='Tracer', ntime=988):
     # ntime = 988  # timesteps (there are actually 989 but divide by 2 to split data evenly)
     features = 100040
-    uTot = np.zeros([ntime // 2, features])
+    xTot = np.zeros([ntime // 2, features])
     y = np.zeros([ntime // 2, features])
     for i in range(ntime):
-        print("Processing file " + filename)
         try:
             filename = filepath + 'LSBU_' + str(i) + '.vtu'
         except:
             print(filename, " does not exist or is not a valid vtu file")
             return
+        print("Processing file " + filename)
         ug = vtktools.vtu(filename)
         if i < ntime / 2:
             if field_name != 'Velocity':
-                ui = ug.GetScalarField(field_name)
+                xi = ug.GetScalarField(field_name)
 
                 # Create the 2D u matrix, [ntime,n]
-                # uTot = np.vstack([uTot, ui]) if uTot.size else ui # model
-                uTot[i % (ntime // 2)] = ui
+                # xTot = np.vstack([xTot, xi]) if xTot.size else xi # model
+                xTot[i % (ntime // 2)] = xi
             else:
-                ui = np.array(ug.GetVectorField(field_name))
-                ui = LA.norm(ui, 2, axis=1)
+                xi = np.array(ug.GetVectorField(field_name))
+                xi = LA.norm(xi, 2, axis=1)
 
-                uTot[i % (ntime // 2)] = ui
+                xTot[i % (ntime // 2)] = xi
         else:
             if field_name != 'Velocity':
                 yi = ug.GetScalarField(field_name)
@@ -44,8 +44,8 @@ def convert(filepath, field_name='Tracer', ntime=988):
                 y[i % (ntime // 2)] = yi
 
     print(ug.GetFieldNames())
-    print(uTot)
-    print(y)
+    print(xTot.shape)
+    print(y.shape)
 
     if not os.path.exists("../data"):
         os.mkdir("../data")
@@ -61,14 +61,8 @@ def convert(filepath, field_name='Tracer', ntime=988):
         back_path = '../data/converted_data/background_velocity.npz'
         obs_path = '../data/converted_data/obs_velocity.npz'
 
-    np.savez_compressed(back_path, u=uTot)
+    np.savez_compressed(back_path, x=xTot)
     np.savez_compressed(obs_path, y=y)
-    ug = vtktools.vtu(filepath + 'LSBU_0.vtu')
-    ug.AddScalarField('x', np.mean(uTot, axis=0))
-    ug.AddScalarField('y', np.mean(y, axis=0))
-    results_filepath = filepath + 'LSBU_0_results' + field_name + '.vtu'
-    if not os.path.exists(results_filepath):
-        ug.Write(filepath + 'LSBU_0_results' + field_name + '.vtu')
 
 
 def get_positions(filepath):
@@ -103,8 +97,8 @@ if __name__ == '__main__':
     args = arg_parser()
 
     convert(args.filepath, ntime=args.ntime)
-    if args.vel:
+    if args.velocity:
         convert(args.filepath, 'Velocity', ntime=args.ntime)
     # convert(args.filepath, 'Pressure')
-    if args.pos:
+    if args.positions:
         get_positions(args.filepath)

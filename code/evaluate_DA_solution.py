@@ -30,7 +30,7 @@ def arg_parser():
 
 if __name__ == '__main__':
     args = arg_parser()
-    if os.path.basename(args.results)[-3:] == "vtu":
+    if os.path.basename(args.results_filepath)[-3:] == "vtu":
         try:
             ug = vtktools.vtu(args.results)
         except:
@@ -39,8 +39,8 @@ if __name__ == '__main__':
         xB = ug.GetScalarField('xB')
         y = ug.GetScalarField('y')
         evaluate_DA_solution(xDA, xB, y)
-    elif os.path.basename(args.results)[-3:] == "npz":
-        result = np.load(args.results)
+    elif os.path.basename(args.results_filepath)[-3:] == "npz":
+        result = np.load(args.results_filepath)
         print('L2 norm of the error in DA solution', result['control'])
         print('L2 norm of the error in DA solution', result['result'])
         print('Time taken to run DA', result['time'])

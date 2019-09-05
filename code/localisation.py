@@ -97,7 +97,7 @@ if __name__ == '__main__':
         y_pos = np.load(args.pos_filepath)['pos'][:, 1]
         z_pos = np.load(args.pos_filepath)['pos'][:, 2]
     except:
-        print("Position filepath not found. Please run convert_vtu.py with pos flag on")
+        print("Position filepath not found or is invalid. Please run convert_vtu.py with pos flag on")
 
     C = localise_h(x_pos, y_pos, int(args.h_cutoff), int(args.rh))  # Ch is (100000 , 50)
     np.savez_compressed('../data/converted_data/reduced_localisation_h'+str(args.rh)+'_'+str(args.h_cutoff)+'.npz',C=C)

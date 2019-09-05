@@ -12,31 +12,11 @@ import argparse
 # sys.path.append('fluidity-master')
 
 
-"""
-# Read .vtu file
-ugg=vtktools.vtu('/homes/rarcucci/4DVAR-ROX/VarDACode/small3DCase/LSBU_100.vtu')
-# Get the field names for the vtu file
-ugg.GetFieldNames()
-# Get tracer observations
-uvwVecobs = ugg.GetScalarField('Tracer')
-
-ug=vtktools.vtu('/homes/rarcucci/4DVAR-ROX/VarDACode/small3DCase/LSBU_10.vtu')
-ug.GetFieldNames()
-# Get tracer values
-uvwVec = ug.GetScalarField('Tracer')
-
-# Get coordinates
-pos=ug.GetLocations()
-# Get z-axis values
-z=pos[:,2]
-"""
-
-
 def build_DA_solution(xB_filepath, y_filepath, V_filepath, ntime=989 // 2, h_localisation=None,
                       v_localisation=None):
     try:
         xB = np.transpose(
-            np.load(xB_filepath)['u'])  # Transpose from 989x100040 to 100040x989
+            np.load(xB_filepath)['x'])  # Transpose from 989x100040 to 100040x989
         print("xB", xB.shape)
     except:
         print("Background error covariance matrix not found. Please run convert_vtu.py")
@@ -175,7 +155,7 @@ def save_DA_solution(xDA, deltaxDA, y, MSE, MSExb, filename, h_localisation, v_l
         os.makedirs('../data/results')
     print("Saving results to " + filename + "...")
     try:
-        ug = vtktools.vtu('../data/small3DLSBU/LSBU_0_results.vtu')
+        ug = vtktools.vtu('../data/small3DLSBU/LSBU_0.vtu')
     except:
         print("Results matrix to record results not found. Please run convert_vtu.py again")
         return
@@ -202,8 +182,8 @@ def save_DA_solution(xDA, deltaxDA, y, MSE, MSExb, filename, h_localisation, v_l
             path += 'rv0'
     path += filename
     print("Saving results to " + path + "...")
-    np.savez_compressed(path, result=MSE, time=elapsed, control=MSExb)
-    ug.Write(path.replace('.npz', '.vtu'))
+    np.savez_compressed(path, result=MSE, time=elapsed, control=MSExb) # SAve MSE, control and time taken
+    ug.Write(path.replace('.npz', '.vtu')) # Save the results of DA to vtu
 
 
 def evaluate_DA_solution(xDA, xB, y):
