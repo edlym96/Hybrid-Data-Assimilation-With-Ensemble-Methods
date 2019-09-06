@@ -6,10 +6,10 @@ The code is separated into 6 files,
     from .vtu format to .npz for easier access
 
 -   `optimal_covariance.py` - Builds the background error covariance
-    CVT, $\textbf{V}$
+    CVT, V
 
 -   `localisation.py` - Builds the localisation matrices,
-    $\textbf{C}_{h}$ and $\textbf{C}_{v}$
+    Ch and Cv
 
 -   `VarDA_3Dtracers_Covariance.py` - Carries out the Data Assimilation
 
