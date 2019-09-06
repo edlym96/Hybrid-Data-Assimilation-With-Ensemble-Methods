@@ -54,9 +54,10 @@ if __name__ == '__main__':
         print('L2 norm of the error in DA solution', result['control'])
         print('L2 norm of the error in DA solution', result['result'])
         print('Time taken to run DA', result['time'])
-        xDA = result['xDA']
-        y = np.load(args.y_filepath)['y']
-        xB = np.load(args.xB_filepath)['x']
-        evaluate_DA_solution(xDA, xB, y)
+        if 'xDA' in result.dtype.names:
+            xDA = result['xDA']
+            y = np.load(args.y_filepath)['y']
+            xB = np.load(args.xB_filepath)['x']
+            evaluate_DA_solution(xDA, xB, y)
     else:
         print("Invalid File")
