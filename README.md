@@ -18,6 +18,7 @@ The code is separated into 6 files,
 
 -   `vtktools.py` - Dependency for reading `.vtu` files
 \
+\
 The files should be ran in this sequence with the exception of
 `vtktools.py`. The instructions for running each file and their
 arguments are as follows.\

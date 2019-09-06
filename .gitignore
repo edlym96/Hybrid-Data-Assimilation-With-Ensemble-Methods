@@ -17,3 +17,4 @@
 /data/
 /code/.idea/
 /code/archive.zip
+/code/*.pyc
